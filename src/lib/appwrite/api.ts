@@ -1,4 +1,4 @@
-import { ID } from "appwrite";
+import { ID, Query } from "appwrite";
 import { INewUser } from "@/types";
 import { account, appwriteConfig, avatars, databases } from "./config";
 
@@ -65,7 +65,7 @@ export async function signInAccount(user:{
     password:string;
 }){
     try {
-        const session = await account.createEmailSession(user.email , user.password);
+        const session = await account.createEmailPasswordSession(user.email , user.password);
         // TODO: see if these parameteres goes in string 
         return session;
     } catch (error) {
@@ -74,17 +74,35 @@ export async function signInAccount(user:{
     }
 }
 
+// export async function getAccount(){
+//     try {
+//         const currentAccount = await account.get();
+//         return currentAccount;
+//     } catch (error) {
+//         console.log('Error in getAccount')
+//     }
+// }
 export async function getCurrentUser(){
     try {
         const currentAccount = await account.get();
 
-        if(!currentAccount) throw Error;
+        if(!currentAccount){
+            throw Error;
+        } 
 
+        const currentUser = await databases.listDocuments(
+            appwriteConfig.databaseId,
+            appwriteConfig.userCollectionId,
+            [Query.equal('accountId' , currentAccount.$id)]
+        )
+
+        if(!currentUser) throw Error;
         
+        return currentUser.documents[0];
 
 
     } catch (error) {
         console.log("Error in getCurrentUser function in api.ts", error);
-        
+        return null;
     }
 }
