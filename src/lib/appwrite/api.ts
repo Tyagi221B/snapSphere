@@ -11,19 +11,19 @@ export async function createUserAccount(user: INewUser) {
             user.name,
         );
 
-        if(!newAccount){
+        if (!newAccount) {
             console.log("Error in creating the new Account in api.ts file")
             throw Error;
         }
-        
+
         const avatarUrl = avatars.getInitials(user.name);
 
         const newUser = await saveUserToDB({
             accountId: newAccount.$id,
-            name:newAccount.name,
-            email:newAccount.email,
-            username:user.username,
-            imageUrl:avatarUrl,
+            name: newAccount.name,
+            email: newAccount.email,
+            username: user.username,
+            imageUrl: avatarUrl,
         })
 
 
@@ -36,14 +36,14 @@ export async function createUserAccount(user: INewUser) {
     }
 }
 
-export async function saveUserToDB(user:{
-    accountId:string,
-    email:string,
-    name:string,
-    imageUrl:URL,
-    username?:string
+export async function saveUserToDB(user: {
+    accountId: string,
+    email: string,
+    name: string,
+    imageUrl: URL,
+    username?: string
 
-}){
+}) {
     try {
         const newUser = await databases.createDocument(
             appwriteConfig.databaseId,
@@ -52,21 +52,18 @@ export async function saveUserToDB(user:{
             user,
         )
         return newUser
-        // TODO: return newUser
     } catch (error) {
         console.log("Error is in saveUserToDB function in api.ts file");
-        throw error;
     }
 
 }
 
-export async function signInAccount(user:{
-    email:string;
-    password:string;
-}){
+export async function signInAccount(user: {
+    email: string;
+    password: string;
+}) {
     try {
-        const session = await account.createEmailPasswordSession(user.email , user.password);
-        // TODO: see if these parameteres goes in string 
+        const session = await account.createEmailSession(user.email, user.password);
         return session;
     } catch (error) {
         console.log("Error in signInAccount function in api.ts");
@@ -82,27 +79,36 @@ export async function signInAccount(user:{
 //         console.log('Error in getAccount')
 //     }
 // }
-export async function getCurrentUser(){
+export async function getCurrentUser() {
     try {
         const currentAccount = await account.get();
 
-        if(!currentAccount){
+        if (!currentAccount) {
             throw Error;
-        } 
-
+        }
+        // console.log("currentAccount:", currentAccount);
+        // console.log("accountId:", currentAccount.$id);
+        // return currentAccount;
         const currentUser = await databases.listDocuments(
             appwriteConfig.databaseId,
             appwriteConfig.userCollectionId,
-            [Query.equal('accountId' , currentAccount.$id)]
-        )
-
-        if(!currentUser) throw Error;
-        
+            [Query.equal("accountId", currentAccount.$id)]
+        );
+        if (!currentUser) throw Error;
         return currentUser.documents[0];
 
 
     } catch (error) {
         console.log("Error in getCurrentUser function in api.ts", error);
         return null;
+    }
+}
+
+export async function signOutAccount(){
+    try {
+        const session = await account.deleteSession("current");
+        return session;
+    } catch (error) {
+        console.log('Error in signOutAccount function in api.ts')
     }
 }
