@@ -46,7 +46,7 @@ const PostDetails = () => {
 									</p>
 									<div className="flex-center gap-2 text-light-3">
 										<p className="subtle-semibold lg:small-regular">
-											{getRelativeTime(post?.$createdAt)}
+                    {post?.$createdAt && getRelativeTime(post.$createdAt)}
 										</p>
 										-
 										<p className="subtel-semibold lg:small-regular">
