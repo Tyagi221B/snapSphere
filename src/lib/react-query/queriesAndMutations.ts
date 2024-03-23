@@ -1,4 +1,4 @@
-import { INewPost, INewUser } from "@/types"
+import { INewPost, INewUser, IUpdatePost } from "@/types"
 import {
     useQuery,
     useMutation,
@@ -6,7 +6,7 @@ import {
     useInfiniteQuery
 } from "@tanstack/react-query"
 import { QUERY_KEYS } from "@/lib/react-query/queryKeys";
-import { createPost, createUserAccount, deleteSavedPost, getCurrentUser, getRecentPosts, likePost, savePost, signInAccount, signOutAccount } from "../appwrite/api"
+import { createPost, createUserAccount, deletePost, deleteSavedPost, getCurrentUser, getPostById, getRecentPosts, likePost, savePost, signInAccount, signOutAccount, updatedPost } from "../appwrite/api"
 
 export const useCreateUserAccount = () => {
     return useMutation({
@@ -98,7 +98,7 @@ export const useDeleteSavedPost = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (savedRecordId :string) => deleteSavedPost(savedRecordId),
+        mutationFn: (savedRecordId: string) => deleteSavedPost(savedRecordId),
         onSuccess: () => {
             queryClient.invalidateQueries({
                 queryKey: [QUERY_KEYS.GET_RECENT_POSTS]
@@ -117,5 +117,39 @@ export const useGetCurrentUser = () => {
     return useQuery({
         queryKey: [QUERY_KEYS.GET_CURRENT_USER],
         queryFn: getCurrentUser
+    })
+}
+
+export const useGetPostById = (postId: string) => {
+    return useQuery({
+        queryKey: [QUERY_KEYS.GET_USER_BY_ID, postId],
+        queryFn: () => getPostById(postId),
+        enabled: !!postId
+    })
+}
+
+export const useUpdatePost = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (post: IUpdatePost) => updatedPost(post),
+        onSuccess: (data) => {
+            queryClient.invalidateQueries({
+                queryKey: [QUERY_KEYS.GET_POST_BY_ID, data?.$id]
+            })
+        }
+    })
+}
+
+export const useDeletePost = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({postId, imageId}: {postId : string , imageId: string}) => deletePost(postId , imageId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: [QUERY_KEYS.GET_RECENT_POSTS]
+            })
+        }
     })
 }
