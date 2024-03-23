@@ -79,6 +79,7 @@ export async function getAccount() {
         console.log('Error in getAccount')
     }
 }
+
 export async function getCurrentUser() {
     try {
         const currentAccount = await getAccount();
@@ -201,3 +202,68 @@ export async function uploadFile(file: File) {
         console.log("Error is in uploadFile function in api.ts", error)
     }
 }
+
+export async function getRecentPosts(){
+    const posts = await databases.listDocuments(
+        appwriteConfig.databaseId,
+        appwriteConfig.postCollectionId,
+        [Query.orderDesc('$createdAt'), Query.limit(20)]
+    )
+    if(!posts) throw Error;
+
+    return posts;
+}
+
+export async function likePost(postId: string, likesArray: string[]){
+    try {
+        const updatedPost = await databases.updateDocument(
+            appwriteConfig.databaseId,
+            appwriteConfig.postCollectionId,
+            postId,
+            {
+                likes:likesArray
+            }
+        )
+        if(!updatedPost) throw Error;
+
+        return updatedPost;
+    } catch (error) {
+        console.log('Error is in likePost function in api.ts ' , error) 
+    }
+}
+
+export async function savePost(postId: string, userId: string){
+    try {
+        const updatedPost = await databases.createDocument(
+            appwriteConfig.databaseId,
+            appwriteConfig.savesCollectionId,
+            ID.unique(),
+            {
+                user: userId,
+                post: postId,
+            }
+        )
+        if(!updatedPost) throw Error;
+
+        return updatedPost;
+    } catch (error) {
+        console.log('Error is in savePost function in api.ts ' , error) 
+    }
+}
+
+export async function deleteSavedPost(savedRecordId: string){
+    try {
+        const statusCode = await databases.deleteDocument(
+            appwriteConfig.databaseId,
+            appwriteConfig.savesCollectionId,
+            savedRecordId,
+
+        )
+        if(!statusCode) throw Error;
+
+        return {status: 'ok'};
+    } catch (error) {
+        console.log('Error is in deleteSavedPost function in api.ts ' , error) 
+    }
+}
+
