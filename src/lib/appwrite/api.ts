@@ -203,36 +203,36 @@ export async function uploadFile(file: File) {
     }
 }
 
-export async function getRecentPosts(){
+export async function getRecentPosts() {
     const posts = await databases.listDocuments(
         appwriteConfig.databaseId,
         appwriteConfig.postCollectionId,
         [Query.orderDesc('$createdAt'), Query.limit(20)]
     )
-    if(!posts) throw Error;
+    if (!posts) throw Error;
 
     return posts;
 }
 
-export async function likePost(postId: string, likesArray: string[]){
+export async function likePost(postId: string, likesArray: string[]) {
     try {
         const updatedPost = await databases.updateDocument(
             appwriteConfig.databaseId,
             appwriteConfig.postCollectionId,
             postId,
             {
-                likes:likesArray
+                likes: likesArray
             }
         )
-        if(!updatedPost) throw Error;
+        if (!updatedPost) throw Error;
 
         return updatedPost;
     } catch (error) {
-        console.log('Error is in likePost function in api.ts ' , error) 
+        console.log('Error is in likePost function in api.ts ', error)
     }
 }
 
-export async function savePost(postId: string, userId: string){
+export async function savePost(postId: string, userId: string) {
     try {
         const updatedPost = await databases.createDocument(
             appwriteConfig.databaseId,
@@ -243,15 +243,15 @@ export async function savePost(postId: string, userId: string){
                 post: postId,
             }
         )
-        if(!updatedPost) throw Error;
+        if (!updatedPost) throw Error;
 
         return updatedPost;
     } catch (error) {
-        console.log('Error is in savePost function in api.ts ' , error) 
+        console.log('Error is in savePost function in api.ts ', error)
     }
 }
 
-export async function deleteSavedPost(savedRecordId: string){
+export async function deleteSavedPost(savedRecordId: string) {
     try {
         const statusCode = await databases.deleteDocument(
             appwriteConfig.databaseId,
@@ -259,15 +259,15 @@ export async function deleteSavedPost(savedRecordId: string){
             savedRecordId,
 
         )
-        if(!statusCode) throw Error;
+        if (!statusCode) throw Error;
 
-        return {status: 'ok'};
+        return { status: 'ok' };
     } catch (error) {
-        console.log('Error is in deleteSavedPost function in api.ts ' , error) 
+        console.log('Error is in deleteSavedPost function in api.ts ', error)
     }
 }
 
-export async function getPostById (postID: string){
+export async function getPostById(postID: string) {
     try {
         const post = await databases.getDocument(
             appwriteConfig.databaseId,
@@ -276,7 +276,7 @@ export async function getPostById (postID: string){
         )
         return post;
     } catch (error) {
-        console.log("Error is in getPostById function in api.ts " , error);
+        console.log("Error is in getPostById function in api.ts ", error);
     }
 }
 
@@ -288,19 +288,19 @@ export async function updatedPost(post: IUpdatePost) {
             imageUrl: post.imageUrl,
             imageId: post.imageId,
         }
-        if(hasFileToUpdate){
+        if (hasFileToUpdate) {
             const uploadedFile = await uploadFile(post.file[0]);
             if (!uploadedFile) throw Error;
-            
+
             const fileUrl = getFilePreview(uploadedFile.$id);
             if (!fileUrl) {
                 await deleteFile(uploadedFile.$id);
                 throw Error;
             }
 
-            image = {...image , imageUrl: fileUrl , imageId: uploadedFile.$id }
+            image = { ...image, imageUrl: fileUrl, imageId: uploadedFile.$id }
         }
-        
+
         const tags = post.tags?.replace(/ /g, "").split(",") || [];
 
 
@@ -331,8 +331,8 @@ export async function updatedPost(post: IUpdatePost) {
     }
 }
 
-export async function deletePost(postId: string , imageId : string){
-    if(!postId || !imageId) throw Error;
+export async function deletePost(postId: string, imageId: string) {
+    if (!postId || !imageId) throw Error;
 
     try {
         await databases.deleteDocument(
@@ -341,7 +341,52 @@ export async function deletePost(postId: string , imageId : string){
             postId,
         )
     } catch (error) {
-       console.log('Error is in delePost funciton in api.ts' , error);
-        
+        console.log('Error is in delePost funciton in api.ts', error);
+
     }
 }
+
+export async function getInfinitePosts({ pageParam }: { pageParam: number }) {
+    const queries: any[] = [Query.orderDesc('$updatedAt'), Query.limit(10)]
+
+    if (pageParam) {
+        queries.push(Query.cursorAfter(pageParam.toString()))
+    }
+    try {
+        const posts = await databases.listDocuments(
+            appwriteConfig.databaseId,
+            appwriteConfig.postCollectionId,
+            queries
+        )
+
+        if (!posts) throw Error;
+        // console.log(posts)
+        return posts;
+    } catch (error) {
+        console.log("Error is in getInfinitePosts ", error);
+
+    }
+}
+
+export async function searchPosts(searchTerm: string) {
+
+    try {
+        const posts = await databases.listDocuments(
+            appwriteConfig.databaseId,
+            appwriteConfig.postCollectionId,
+            [Query.search('caption', searchTerm)]
+        )
+
+        if (!posts) throw Error;
+        // console.log(posts)
+
+        return posts;
+    } catch (error) {
+        console.log("Error is in searchPosts ", error);
+
+    }
+}
+
+// export async function savePosts(userId : string){
+
+// }
