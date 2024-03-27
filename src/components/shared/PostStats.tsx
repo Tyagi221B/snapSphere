@@ -17,8 +17,8 @@ const PostStats = ({ post, userId }: PostStatsProps) => {
 	const [isSaved, setIsSaved] = useState(false);
 
 	const { mutate: likePost } = useLikePost();
-	const { mutate: savePost, isPending: isSavingPost } = useSavePost();
-	const { mutate: deleteSavedPost, isPending: isDeletingSaved } =
+	const { mutate: savePost, isLoading: isSavingPost } = useSavePost();
+	const { mutate: deleteSavedPost, isLoading: isDeletingSaved } =
 		useDeleteSavedPost();
 
 	const { data: currentUser } = useGetCurrentUser();

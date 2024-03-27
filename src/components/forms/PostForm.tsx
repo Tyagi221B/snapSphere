@@ -31,10 +31,10 @@ const PostForm = ({ post, action }: PostFormProps) => {
 	const { toast } = useToast();
 	const navigate = useNavigate();
 
-	const { mutateAsync: createPost, isPending: isLoadingCreate } =
+	const { mutateAsync: createPost, isLoading: isLoadingCreate } =
 		useCreatePost();
 
-	const {mutateAsync: updatePost , isPending : isLoadingUpdate } = useUpdatePost();
+	const {mutateAsync: updatePost , isLoading : isLoadingUpdate } = useUpdatePost();
 
 	const form = useForm<z.infer<typeof PostValidation>>({
 		resolver: zodResolver(PostValidation),

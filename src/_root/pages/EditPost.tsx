@@ -4,8 +4,8 @@ import { useParams } from "react-router-dom"
 
 const EditPost = () => {
   const {id} = useParams();
-  const {data: post , isPending} = useGetPostById(id || '');
-  if(isPending) return <div>Loading</div>
+  const {data: post , isLoading} = useGetPostById(id || '');
+  if(isLoading) return <div>Loading</div>
 
   return (
     <div className="flex flex-1">
