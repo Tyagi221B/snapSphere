@@ -63,7 +63,7 @@ export async function signInAccount(user: {
     password: string;
 }) {
     try {
-        const session = await account.createEmailSession(user.email, user.password);
+        const session = await account.createEmailPasswordSession(user.email, user.password);
         return session;
     } catch (error) {
         console.log("Error in signInAccount function in api.ts");
@@ -74,6 +74,7 @@ export async function signInAccount(user: {
 export async function getAccount() {
     try {
         const currentAccount = await account.get();
+        console.log(currentAccount)
         return currentAccount;
     } catch (error) {
         console.log('Error in getAccount')
