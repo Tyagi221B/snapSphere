@@ -5,32 +5,35 @@ export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs))
 }
 
-export function getRelativeTime(timestamp: string): string {
-    const now: Date = new Date();
-    const postDate: Date = new Date(timestamp);
+export function getRelativeTime(date: string): string {
+    const now = new Date();
+    const pastDate = new Date(date); // Convert string to Date object
 
-    const timeDiff: number = now.getTime() - postDate.getTime();
-    const seconds: number = Math.floor(timeDiff / 1000);
-    const minutes: number = Math.floor(seconds / 60);
-    const hours: number = Math.floor(minutes / 60);
-    const days: number = Math.floor(hours / 24);
-
-    if (days > 1) {
-        return `${days} days ago`;
-    } else if (days === 1) {
-        return '1 day ago';
-    } else if (hours > 1) {
-        return `${hours} hours ago`;
-    } else if (hours === 1) {
-        return '1 hour ago';
-    } else if (minutes > 1) {
-        return `${minutes} minutes ago`;
-    } else if (minutes === 1) {
-        return '1 minute ago';
-    } else {
-        return 'just now';
+    if (isNaN(pastDate.getTime())) {
+        return "Invalid date";
     }
+
+    const secondsAgo = Math.floor((now.getTime() - pastDate.getTime()) / 1000);
+
+    const units = [
+        { label: "year", seconds: 31536000 },
+        { label: "month", seconds: 2592000 },
+        { label: "week", seconds: 604800 },
+        { label: "day", seconds: 86400 },
+        { label: "hour", seconds: 3600 },
+        { label: "minute", seconds: 60 },
+        { label: "second", seconds: 1 },
+    ];
+
+    for (const unit of units) {
+        const interval = Math.floor(secondsAgo / unit.seconds);
+        if (interval >= 1) {
+            return `${interval} ${unit.label}${interval > 1 ? "s" : ""} ago`;
+        }
+    }
+    return "just now";
 }
+
 
 export const convertFileToUrl = (file: File) => URL.createObjectURL(file);
 

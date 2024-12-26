@@ -106,6 +106,9 @@ const SigninForm = () => {
         text-small-semibold ml-1">Sign up</Link>
         </p>
 				</form>
+
+				<h1>Dummy email - virat@gmail.com</h1>
+				<h1>Password - 12345678</h1>
 			</div>
 		</Form>
 	);
